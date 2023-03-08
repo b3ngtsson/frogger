@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+</head>
+<body>
+    <div id="chatbox" style="height: 300px; overflow-y: scroll;"></div>
+    <input type="text" id="message" placeholder="Type your message...">
+    <button id="send">Send</button>
+    <script>
+        const socket = new WebSocket('ws://localhost:5555');
+
+        socket.onopen = () => {
+            console.log('Connected to server.');
+            const nickname = prompt('Enter your nickname:');
+            socket.send(`NICK ${nickname}`);
+        };
+
+        socket.onmessage = (event) => {
+            const data = event.data;
+            addMessage(data);
+        };
+
+        function addMessage(message) {
+            const chatbox = document.getElementById('chatbox');
+            const p = document.createElement('p');
+            p.innerText = message;
+            chatbox.appendChild(p);
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value;
+            socket.send(message);
+            messageInput.value = '';
+        }
+
+        document.getElementById('send').addEventListener('click', () => {
+            sendMessage();
+        });
+
+        document.getElementById('message').addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
